@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# $1 indicates the target folder (e.g. salt19)
+
+# $2 should be the program ID
+# options are : 2013-1-UKSC_HET_OTH-001
+#             : 2013-1-UKSC-006
+
+# $3 should be the date 
+
+# Example:
+# ./Fetcher salt13 2013-1-UKSC_HET_OTH-001 20130520
+# ./Fetcher salt14 2014-2-SCI-043 20150411
+# ./Fetcher salt   2023-1-MLT-007 20230502
+
+
+if [ $# -ne 3 ] ; then echo "Error -- invocation: ./Fetcher salt[yy] [program-id] [date]" ; exit; fi
+
+cd ../${1}.downloads/
+# rm wget-*
+
+if [ ! -a ${2}.${3}_product.tar.bz2 ] ; then rm ${2}.${3}_product.tar.bz2; fi
+wget --user=[enter username] --password='[enter password]' -b -c -t 100 ftp://saltdata.salt.ac.za/${2}.${3}_product.tar.bz2
+# if [ ! -a ${2}.${3}_product.tar.bz2 ] ; then wget --user=[enter username] --password='[enter password]' -b -c -t 100 ftp://saltdata.salt.ac.za/${2}.${3}_product.tar.bz2; fi
+
+# if [ ! -e ${2}.${3}_raw.tar.bz2 ] ; then wget --user=[enter username] --password='[enter password]' -b -c -t 100 ftp://saltdata.salt.ac.za/${2}.${3}_raw.tar.bz2; fi
+echo ' No longer downloading raw data '
+
+if [ ! -e ${2}.${3}_doc.tar.bz2 ] ; then wget --user=[enter username] --password='[enter password]' -b -c -t 100 ftp://saltdata.salt.ac.za/${2}.${3}_doc.tar.bz2; fi
+
+

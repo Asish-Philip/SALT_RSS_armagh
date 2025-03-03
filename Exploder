@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# ---
+# 
+# ~/Dschubba/salt.reductions/Exploder
+# 
+# $1 should be the year (eg 2014 .... salt14)
+# $2 should be the program ID
+# $3 should be the date / run id
+#
+# Example:
+#  ./Exploder salt15 2014-2-SCI-043 20150411  
+#
+# ----
+
+# Confirm usage and input
+source="../$1.downloads/$2.$3"
+folder=$3
+echo "./Exploder salt_year obs_prog obs_night"
+echo "           expanding downloads from ${source} into salt.reductions/${folder}"
+
+# Identify special case extraxctions (all historical)
+if [ $2 == "2013-1-UKSC-006" ]; then folder=$3'_SDB'; fi 
+if [ $2 == "2014-1-UKSC-005" ]; then folder=$3'_SDB'; fi 
+if [ $2 == "2015-1-SCI-009" ]; then folder=$3'_BXCIR'; fi 
+if [ $2 == "2015-1-SCI-022" ]; then folder=$3'_DYCEN'; fi 
+if [ $2 == "2015-2-SCI-044" ]; then folder=$3'_V760'; fi 
+
+# Verify data
+if [ ! -e ${source}_product.tar.bz2 ]; then echo "bad filename"; exit; fi
+if [ ! -e ${folder} ]; then mkdir ../salt.rss.data/$folder; fi
+
+# Extract data to folder observed
+cd ../salt.rss.data/$folder
+source="../../$1.downloads/$2.$3"
+ls -la ${source}*
+if [ ! -d product ] ; then tar -jxvf ${source}_product.tar.bz2; fi
+tar -jxf ${source}_product.tar.bz2
+if [ ! -d doc ] ; then tar -jxf ${source}_doc.tar.bz2; fi
+if [ -a  ${source}_raw.tar.bz2 ] && [ ! -e raw ]; then tar -jxf ${source}_raw.tar.bz2; fi
+chmod 755 ../$folder
+chmod 755 *
+chmod 644 product/*
+chmod 644 doc/*
+
+# Report targets observed
+echo
+echo "Blocks attempted on $3:"
+echo "--"
+grep -B4 'Jeffery' ./doc/AstronomersLogExtract${3}.txt | grep -v 'Proposal'
+echo
+
+# Move logfiles to webspace
+cp ./doc/AstronomersLogExtract${3}.txt  ~/www/salt23.logs/
+chmod 644 ../../www/salt23.logs/*txt
+grep 'Target' ~/www/salt23.logs/AstronomersLogExtract*.txt | sed -e "s/.*AstronomersLogExtract//" | sed -e "s/.txt.*://" | grep $3
+grep 'Target' ~/www/salt23.logs/AstronomersLogExtract*.txt | sed -e "s/.*AstronomersLogExtract//" | sed -e "s/.txt.*://" > ~/salt.utilities/Logfile2023
+chmod 644 ~/salt.utilities/Logfile2023
+echo 'Summary: grep "Target" ../www/salt23.logs/AstronomersLogExtract*.txt | sed -e "s/.*AstronomersLogExtract//" | sed -e "s/.txt.*://" '
+echo 'Select columns with pipe to: |  cut -f 1-2 -d " "'
+
+# Revert folder
+cd -
+
